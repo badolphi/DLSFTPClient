@@ -31,6 +31,7 @@
 
 #include <fcntl.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <arpa/inet.h>
 #include "libssh2.h"
 #include "libssh2_config.h"
