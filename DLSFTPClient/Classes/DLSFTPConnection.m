@@ -202,7 +202,7 @@ static NSString * const SFTPClientCompleteRequestException = @"SFTPClientComplet
     if (_idleTimer == NULL) {
         _idleTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
         dispatch_source_set_timer(_idleTimer, DISPATCH_TIME_FOREVER, DISPATCH_TIME_FOREVER, 0);
-        __weak DLSFTPConnection *weakSelf = self;
+        /*__weak*/ DLSFTPConnection *weakSelf = self;
         dispatch_source_set_event_handler(_idleTimer, ^{
             [weakSelf disconnect];
             [weakSelf cancelIdleTimer];
@@ -305,7 +305,7 @@ static NSString * const SFTPClientCompleteRequestException = @"SFTPClientComplet
 }
 
 - (void)startSFTPSession {
-    __weak DLSFTPConnection *weakSelf = self;
+    /*__weak*/ DLSFTPConnection *weakSelf = self;
     dispatch_group_async(_connectionGroup, self.socketQueue, ^{
         int socketFD = self.socket;
         LIBSSH2_SESSION *session = self.session;
@@ -405,7 +405,7 @@ static NSString * const SFTPClientCompleteRequestException = @"SFTPClientComplet
 
 - (void)submitRequest:(DLSFTPRequest *)request {
     request.connection = self;
-    __weak DLSFTPConnection *weakSelf = self;
+    /*__weak*/ DLSFTPConnection *weakSelf = self;
     dispatch_barrier_async(_requestQueue, ^{
         [weakSelf.requests addObject:request];
         [weakSelf cancelIdleTimer];
@@ -414,7 +414,7 @@ static NSString * const SFTPClientCompleteRequestException = @"SFTPClientComplet
 }
 
 - (void)removeRequest:(DLSFTPRequest *)request {
-    __weak DLSFTPConnection *weakSelf = self;
+    /*__weak*/ DLSFTPConnection *weakSelf = self;
     dispatch_barrier_async(_requestQueue, ^{
         request.connection = nil;
         if ([weakSelf.currentRequest isEqual:request]) {
@@ -434,7 +434,7 @@ static NSString * const SFTPClientCompleteRequestException = @"SFTPClientComplet
     if (self.currentRequest) {
         return;
     }
-    __weak DLSFTPConnection *weakSelf = self;
+    /*__weak*/ DLSFTPConnection *weakSelf = self;
     dispatch_barrier_async(_requestQueue, ^{
         if (weakSelf.currentRequest) {
             return;
@@ -465,7 +465,7 @@ static NSString * const SFTPClientCompleteRequestException = @"SFTPClientComplet
                     format:@"Exception completing request %@, it is not the current request %@" , request, self.currentRequest];
         return;
     }
-    __weak DLSFTPConnection *weakSelf = self;
+    /*__weak*/ DLSFTPConnection *weakSelf = self;
     dispatch_group_notify(_connectionGroup, self.socketQueue, ^{
         if (failed) {
             [request fail];
@@ -515,7 +515,7 @@ static NSString * const SFTPClientCompleteRequestException = @"SFTPClientComplet
 #pragma mark Public
 
 - (void)cancelAllRequests {
-    __weak DLSFTPConnection *weakSelf = self;
+    /*__weak*/ DLSFTPConnection *weakSelf = self;
     [self.currentRequest cancel];
     dispatch_barrier_sync(_requestQueue, ^{
         for (DLSFTPRequest *request in weakSelf.requests) {
@@ -528,7 +528,7 @@ static NSString * const SFTPClientCompleteRequestException = @"SFTPClientComplet
 
 - (NSUInteger)requestCount {
     __block NSUInteger count = 0;
-    __weak DLSFTPConnection *weakSelf = self;
+    /*__weak*/ DLSFTPConnection *weakSelf = self;
     dispatch_sync(_requestQueue, ^{
         count = [weakSelf.requests count];
     });
@@ -576,7 +576,7 @@ static NSString * const SFTPClientCompleteRequestException = @"SFTPClientComplet
                          errorDescription:@"Already connected"];
         return;
     } else {
-        __weak DLSFTPConnection *weakSelf = self;
+        /*__weak*/ DLSFTPConnection *weakSelf = self;
         // set up a timeout handler
         dispatch_source_t timeoutTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
                                                                 dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0));
@@ -639,7 +639,7 @@ static NSString * const SFTPClientCompleteRequestException = @"SFTPClientComplet
         self.connectionSuccessBlock = nil;
         return;
     }
-    __weak DLSFTPConnection *weakSelf = self;
+    /*__weak*/ DLSFTPConnection *weakSelf = self;
     NSData *addressData = [addresses objectAtIndex:index];
     int result = -1;
     struct sockaddr *soin = NULL;
@@ -779,7 +779,7 @@ static NSString * const SFTPClientCompleteRequestException = @"SFTPClientComplet
 
 - (void)timeoutTimerHandler {
     // timeout fired, close the socket
-    __weak DLSFTPConnection *weakSelf = self;
+    /*__weak*/ DLSFTPConnection *weakSelf = self;
     dispatch_sync(self.socketQueue, ^{
         [weakSelf _disconnect]; // closes on socketQueue
     });
